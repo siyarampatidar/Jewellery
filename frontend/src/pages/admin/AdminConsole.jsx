@@ -514,11 +514,8 @@ const AdminConsole = () => {
         {/* Sidebar Header Logo Area */}
         <div className="p-6 border-b border-[#ece9df] flex items-center justify-between">
           <Link to="/admin" className="flex flex-col select-none cursor-pointer">
-            <span className="brand-logo text-zinc-900 tracking-[0.25em] text-2xl font-light italic">
+            <span className="brand-logo text-primary tracking-[0.25em] text-2xl font-light italic">
               JEWELLERY
-            </span>
-            <span className="brand-label text-[#c5a059] tracking-[0.4em] text-[8px] font-bold">
-              ATELIER SHELL
             </span>
           </Link>
           {/* Mobile Close Button */}
@@ -611,7 +608,7 @@ const AdminConsole = () => {
             <FiMenu className="w-6 h-6" />
           </button>
           
-          <span className="brand-logo text-zinc-900 text-xl font-light italic tracking-wider">JEWELLERY</span>
+          <span className="brand-logo text-primary text-xl font-light italic tracking-wider">JEWELLERY</span>
           
           {user?.profileImage?.url ? (
             <img

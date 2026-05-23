@@ -241,62 +241,81 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                 {/* LEFT: Image Gallery Column (5 cols) */}
                 <div className="md:col-span-6 space-y-4">
                   
-                  {/* Active Large Image Display with Zoom */}
-                  <div 
-                    onMouseMove={handleMouseMove}
-                    className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-zinc-50 border border-primary/5 cursor-zoom-in group"
-                  >
-                    {/* Floating Controls (Top-Left) */}
-                    <div className="absolute top-3 left-3 z-20 flex flex-col gap-2 items-start">
-                      {discountPercent > 0 && (
-                        <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 bg-red-600 text-white rounded-md shadow-md">
-                          {discountPercent}% OFF
-                        </span>
+                  {/* Image Display Wrapper with Side Zoom Magnifier */}
+                  <div className="relative group">
+                    {/* Active Large Image Display */}
+                    <div 
+                      onMouseMove={handleMouseMove}
+                      className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-zinc-50 border border-primary/5 md:cursor-zoom-in cursor-default"
+                    >
+                      {/* Floating Controls (Top-Left) */}
+                      <div className="absolute top-3 left-3 z-20 flex flex-col gap-2 items-start">
+                        {discountPercent > 0 && (
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 bg-red-600 text-white rounded-md shadow-md">
+                            {discountPercent}% OFF
+                          </span>
+                        )}
+
+                        {/* Wishlist Button */}
+                        <motion.button
+                          type="button"
+                          whileTap={{ scale: 1.25 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleWishlist();
+                          }}
+                          className={`p-2.5 rounded-full backdrop-blur-md border shadow-md cursor-pointer transition-all duration-300 ${
+                            isWishlisted
+                              ? 'bg-red-50 border-red-200 text-red-500'
+                              : 'bg-white/90 border-primary/10 text-zinc-700 hover:text-red-500'
+                          }`}
+                          title={isWishlisted ? 'Remove Wishlist' : 'Add Wishlist'}
+                        >
+                          <FiHeart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                        </motion.button>
+
+                        {/* Share Button */}
+                        <motion.button
+                          type="button"
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShare();
+                          }}
+                          className="p-2.5 rounded-full border bg-white/90 border-primary/10 text-zinc-700 hover:text-primary transition shadow-md flex items-center justify-center cursor-pointer"
+                          title="Share Product"
+                        >
+                          <FiShare2 className="w-4 h-4" />
+                        </motion.button>
+                      </div>
+
+                      {images.length > 0 ? (
+                        <img
+                          src={images[activeImageIndex]?.url}
+                          alt={product.productName}
+                          className="w-full h-full object-cover pointer-events-none"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                          No Image Available
+                        </div>
                       )}
-
-                      {/* Wishlist Button */}
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 1.25 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleWishlist();
-                        }}
-                        className={`p-2.5 rounded-full backdrop-blur-md border shadow-md cursor-pointer transition-all duration-300 ${
-                          isWishlisted
-                            ? 'bg-red-50 border-red-200 text-red-500'
-                            : 'bg-white/90 border-primary/10 text-zinc-700 hover:text-red-500'
-                        }`}
-                        title={isWishlisted ? 'Remove Wishlist' : 'Add Wishlist'}
-                      >
-                        <FiHeart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-                      </motion.button>
-
-                      {/* Share Button */}
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShare();
-                        }}
-                        className="p-2.5 rounded-full border bg-white/90 border-primary/10 text-zinc-700 hover:text-primary transition shadow-md flex items-center justify-center cursor-pointer"
-                        title="Share Product"
-                      >
-                        <FiShare2 className="w-4 h-4" />
-                      </motion.button>
                     </div>
 
-                    {images.length > 0 ? (
-                      <img
-                        src={images[activeImageIndex]?.url}
-                        alt={product.productName}
-                        style={{ transformOrigin: zoomOrigin }}
-                        className="w-full h-full object-cover transition-transform duration-150 ease-out group-hover:scale-[1.8] pointer-events-none md:pointer-events-auto"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                        No Image Available
+                    {/* Side Zoom Preview Panel - Only active on large screens (md and above) during hover */}
+                    {images.length > 0 && (
+                      <div className="hidden group-hover:md:block absolute left-full top-0 w-full h-full pl-8 z-40 pointer-events-none">
+                        <div className="w-full h-full bg-white border border-primary/15 shadow-2xl rounded-2xl overflow-hidden">
+                          <img
+                            src={images[activeImageIndex]?.url}
+                            alt="Zoomed view"
+                            style={{
+                              transformOrigin: zoomOrigin,
+                              transform: 'scale(2.5)'
+                            }}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -361,13 +380,15 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                         Size Guide
                       </button>
                     </div>
-                    <div className="flex gap-2.5 flex-wrap">
+                    <div className="flex gap-2.5 flex-wrap items-center">
                       {parsedSizes.map((sz) => (
                         <button
                           key={sz}
                           type="button"
                           onClick={() => setSelectedSize(sz)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-full text-xs font-bold border transition duration-300 cursor-pointer ${
+                          className={`h-10 flex items-center justify-center rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider border transition duration-300 cursor-pointer shrink-0 whitespace-nowrap ${
+                            sz.toString().length <= 3 ? 'w-10' : 'px-4 min-w-[2.5rem]'
+                          } ${
                             selectedSize === sz
                               ? 'bg-zinc-950 border-zinc-950 text-white scale-105 shadow-md'
                               : 'bg-white border-zinc-200 text-zinc-800 hover:border-zinc-950'

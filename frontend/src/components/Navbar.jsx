@@ -142,9 +142,9 @@ const Navbar = () => {
                   <div className="flex items-center">
                     <Link
                       to="/home"
-                      className="flex flex-col items-start group select-none gap-0.5"
+                      className="flex flex-col items-start select-none"
                     >
-                      <span className="brand-logo text-zinc-950 transition duration-300 group-hover:text-primary">
+                      <span className="brand-logo text-primary transition duration-300">
                         JEWELLERY
                       </span>
                     </Link>
