@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiSliders, FiArrowRight, FiCheck } from "react-icons/fi";
+import { FiX, FiSliders, FiArrowRight, FiCheck, FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { fetchCategories } from "../redux/categorySlice";
 import { fetchProducts } from "../redux/productSlice";
@@ -26,6 +26,23 @@ const Collection = () => {
   const searchQuery = searchParams.get("search");
   const [sortBy, setSortBy] = useState("recommended"); // 'recommended', 'price-low', 'price-high'
   const [priceRange, setPriceRange] = useState("all");
+  const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+  const priceOptions = [
+    { value: "all", label: "All Prices" },
+    { value: "0-100", label: "₹0 - ₹100" },
+    { value: "100-500", label: "₹100 - ₹500" },
+    { value: "500-1500", label: "₹500 - ₹1500" },
+    { value: "1500-4000", label: "₹1500 - ₹4000" },
+    { value: "4000-above", label: "₹4000 & Above" },
+  ];
+
+  const sortOptions = [
+    { value: "recommended", label: "Curated / New" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+  ];
 
   // Product detail modal states
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -174,6 +191,7 @@ const Collection = () => {
   const clearAllFilters = () => {
     setSearchParams({});
     setSortBy("recommended");
+    setPriceRange("all");
   };
 
   const FALLBACK_IMAGES = [
@@ -305,7 +323,18 @@ const Collection = () => {
           )}
 
         {/* 4. Filter Dashboard Footer: Active Filters & Sorting */}
-        <div className="flex flex-row justify-between items-center py-3 border-b border-primary/10 mb-6 gap-2">
+        <div className="flex flex-row justify-between items-center py-3 border-b border-primary/10 mb-6 gap-2 relative">
+          {/* Backdrop overlay for closing dropdowns when clicking outside */}
+          {(isPriceDropdownOpen || isSortDropdownOpen) && (
+            <div
+              className="fixed inset-0 z-30 bg-transparent"
+              onClick={() => {
+                setIsPriceDropdownOpen(false);
+                setIsSortDropdownOpen(false);
+              }}
+            />
+          )}
+
           {/* Left side: Icon + label at start of row */}
           <div className="flex items-center gap-1.5 text-zinc-500 flex-shrink-0">
             <FiSliders className="w-3.5 h-3.5 text-primary" />
@@ -314,41 +343,116 @@ const Collection = () => {
             </span>
           </div>
 
-          {/* Right side: Select inputs side-by-side in a single row */}
+          {/* Right side: Custom select dropdowns side-by-side */}
           <div className="flex flex-1 items-center justify-end gap-2">
             {/* Price Range Filter */}
-            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none relative z-40">
               <span className="hidden sm:inline-block text-[9px] font-bold tracking-widest uppercase text-zinc-400 whitespace-nowrap">
                 Price Range
               </span>
-              <select
-                value={priceRange}
-                onChange={(e) => setPriceRange(e.target.value)}
-                className="w-full bg-white/80 border border-primary/15 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 focus:outline-none focus:border-primary cursor-pointer select-none shadow-xs"
-              >
-                <option value="all">All Prices</option>
-                <option value="0-100">₹0 - ₹100</option>
-                <option value="100-500">₹100 - ₹500</option>
-                <option value="500-1500">₹500 - ₹1500</option>
-                <option value="1500-4000">₹1500 - ₹4000</option>
-                <option value="4000-above">₹4000 & Above</option>
-              </select>
+              <div className="relative w-full sm:w-44">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPriceDropdownOpen(!isPriceDropdownOpen);
+                    setIsSortDropdownOpen(false);
+                  }}
+                  className="w-full bg-white border border-primary/15 hover:border-primary/45 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 flex justify-between items-center transition cursor-pointer shadow-2xs select-none"
+                >
+                  <span className="truncate">
+                    {priceOptions.find((opt) => opt.value === priceRange)?.label || "All Prices"}
+                  </span>
+                  <FiChevronDown className={`w-3.5 h-3.5 text-primary transition-transform duration-300 ${isPriceDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isPriceDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-primary/20 rounded-xl shadow-lg z-50 overflow-hidden py-1"
+                    >
+                      {priceOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setPriceRange(opt.value);
+                            setIsPriceDropdownOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-left text-[10px] sm:text-xs font-medium tracking-wide flex justify-between items-center transition cursor-pointer ${
+                            priceRange === opt.value
+                              ? "bg-primary/5 text-primary font-bold"
+                              : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {priceRange === opt.value && (
+                            <FiCheck className="w-3.5 h-3.5 text-primary" />
+                          )}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Sorting controls */}
-            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none relative z-40">
               <span className="hidden sm:inline-block text-[9px] font-bold tracking-widest uppercase text-zinc-400 whitespace-nowrap">
                 Sort By
               </span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white/80 border border-primary/15 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 focus:outline-none focus:border-primary cursor-pointer select-none shadow-xs"
-              >
-                <option value="recommended">Curated / New</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
+              <div className="relative w-full sm:w-44">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSortDropdownOpen(!isSortDropdownOpen);
+                    setIsPriceDropdownOpen(false);
+                  }}
+                  className="w-full bg-white border border-primary/15 hover:border-primary/45 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 flex justify-between items-center transition cursor-pointer shadow-2xs select-none"
+                >
+                  <span className="truncate">
+                    {sortOptions.find((opt) => opt.value === sortBy)?.label || "Curated / New"}
+                  </span>
+                  <FiChevronDown className={`w-3.5 h-3.5 text-primary transition-transform duration-300 ${isSortDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isSortDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-primary/20 rounded-xl shadow-lg z-50 overflow-hidden py-1"
+                    >
+                      {sortOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(opt.value);
+                            setIsSortDropdownOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-left text-[10px] sm:text-xs font-medium tracking-wide flex justify-between items-center transition cursor-pointer ${
+                            sortBy === opt.value
+                              ? "bg-primary/5 text-primary font-bold"
+                              : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {sortBy === opt.value && (
+                            <FiCheck className="w-3.5 h-3.5 text-primary" />
+                          )}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
