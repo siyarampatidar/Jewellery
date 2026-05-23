@@ -23,6 +23,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
   const [pincode, setPincode] = useState('');
   const [deliveryStatus, setDeliveryStatus] = useState(null);
   const [zoomOrigin, setZoomOrigin] = useState('center');
+  const touchStartX = useRef(null);
 
   // Reset local selections when modal opens/changes product
   useEffect(() => {
@@ -76,6 +77,29 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
     setZoomOrigin(`${x}% ${y}%`);
+  };
+
+  // Touch swipe events for mobile gallery
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX.current - touchEndX;
+
+    // Swipe threshold of 50px
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0) {
+        // Swiped left -> next image
+        setActiveImageIndex((prev) => (prev + 1) % images.length);
+      } else {
+        // Swiped right -> previous image
+        setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+      }
+    }
+    touchStartX.current = null;
   };
 
   const handleWishlist = () => {
@@ -246,6 +270,8 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                     {/* Active Large Image Display */}
                     <div 
                       onMouseMove={handleMouseMove}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
                       className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-zinc-50 border border-primary/5 md:cursor-zoom-in cursor-default"
                     >
                       {/* Floating Controls (Top-Left) */}
@@ -300,11 +326,33 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                           No Image Available
                         </div>
                       )}
+
+                      {/* Dynamic Dots Overlay (Bottom Center) */}
+                      {images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
+                          {images.map((_, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveImageIndex(idx);
+                              }}
+                              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                                activeImageIndex === idx 
+                                  ? 'w-4 bg-white' 
+                                  : 'w-1.5 bg-white/50 hover:bg-white/85'
+                              }`}
+                              aria-label={`Go to slide ${idx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Side Zoom Preview Panel - Only active on large screens (md and above) during hover */}
                     {images.length > 0 && (
-                      <div className="hidden group-hover:md:block absolute left-full top-0 w-full h-full pl-8 z-40 pointer-events-none">
+                      <div className="hidden group-hover:md:block absolute left-full top-0 w-1/2 h-1/2 pl-4 z-40 pointer-events-none">
                         <div className="w-full h-full bg-white border border-primary/15 shadow-2xl rounded-2xl overflow-hidden">
                           <img
                             src={images[activeImageIndex]?.url}
