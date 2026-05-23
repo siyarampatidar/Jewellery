@@ -24,9 +24,10 @@ const ProductCard = ({ product, onOpenDetail }) => {
           },
         ];
 
-  const parsedSizes = product.sizes && product.sizes.length > 0
-    ? product.sizes
-    : ["Standard", "Adjustable"];
+  const parsedSizes =
+    product.sizes && product.sizes.length > 0
+      ? product.sizes
+      : ["Standard", "Adjustable"];
 
   // Parse color from attributes
   const colorAttr = product.attributes?.find((attr) =>
@@ -50,26 +51,26 @@ const ProductCard = ({ product, onOpenDetail }) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       toast.error("Please login to add designs to your Wishlist.", {
-        style: { background: "#111", color: "#faf9f6", borderRadius: "12px" }
+        style: { background: "#111", color: "#faf9f6", borderRadius: "12px" },
       });
       return;
     }
     dispatch(toggleWishlistDB(product._id));
-    if (isWishlisted) {
-      toast.success(`${product.productName} removed from Wishlist.`, {
-        style: { background: "#111", color: "#faf9f6", borderRadius: "12px" },
-      });
-    } else {
-      toast.success(`${product.productName} added to Wishlist!`, {
-        style: {
-          background: "#111",
-          color: "#faf9f6",
-          borderRadius: "12px",
-          border: "1px solid rgba(197,160,89,0.3)",
-        },
-        iconTheme: { primary: "#c5a059", secondary: "#111" },
-      });
-    }
+    // if (isWishlisted) {
+    //   toast.success(`${product.productName} removed from Wishlist.`, {
+    //     style: { background: "#111", color: "#faf9f6", borderRadius: "12px" },
+    //   });
+    // } else {
+    //   toast.success(`${product.productName} added to Wishlist!`, {
+    //     style: {
+    //       background: "#111",
+    //       color: "#faf9f6",
+    //       borderRadius: "12px",
+    //       border: "1px solid rgba(197,160,89,0.3)",
+    //     },
+    //     iconTheme: { primary: "#c5a059", secondary: "#111" },
+    //   });
+    // }
   };
 
   const handleQuickAddToCart = (e) => {
@@ -77,7 +78,7 @@ const ProductCard = ({ product, onOpenDetail }) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       toast.error("Please login to add designs to your Boutique Bag.", {
-        style: { background: "#111", color: "#faf9f6", borderRadius: "12px" }
+        style: { background: "#111", color: "#faf9f6", borderRadius: "12px" },
       });
       return;
     }
@@ -96,13 +97,13 @@ const ProductCard = ({ product, onOpenDetail }) => {
       addToCartDB({
         productId: product._id,
         name: product.productName,
-        category: product.category?.categoryName || 'Boutique',
+        category: product.category?.categoryName || "Boutique",
         price: product.discountPrice || product.price,
         originalPrice: product.price,
         size: defaultSize,
         color: defaultColor,
         quantity: 1,
-        image: product.images?.[0]?.url || '',
+        image: product.images?.[0]?.url || "",
         stockQuantity: product.stockQuantity,
       }),
     );
@@ -180,7 +181,7 @@ const ProductCard = ({ product, onOpenDetail }) => {
       className="group relative flex flex-col bg-white rounded-[24px] border border-primary/5 hover:border-primary/20 transition-all duration-500 hover:shadow-[0_15px_40px_rgba(15,15,15,0.06)] overflow-hidden cursor-pointer"
     >
       {/* 1. Image Slider Viewport */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-zinc-50 select-none">
+      <div className="relative aspect-square overflow-hidden bg-zinc-50 select-none">
         {/* Discount Badge */}
         {product.discountPrice && (
           <span className="absolute top-3 left-3 z-10 text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 bg-white/95 backdrop-blur-md text-red-600 rounded-md border border-red-100 shadow-xs">
@@ -272,7 +273,9 @@ const ProductCard = ({ product, onOpenDetail }) => {
       <div className="pt-4 pb-5 px-4 text-center flex-1 flex flex-col justify-between">
         <div>
           <span className="text-[9px] font-bold tracking-[0.2em] text-primary uppercase">
-            {product.brand || product.category?.categoryName || "JEWELLERY ATELIER"}
+            {product.brand ||
+              product.category?.categoryName ||
+              "JEWELLERY ATELIER"}
           </span>
           <h3 className="text-sm font-semibold text-zinc-950 hover:text-primary transition duration-300 line-clamp-1 mt-0.5 font-sans">
             {product.productName}

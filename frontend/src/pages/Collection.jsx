@@ -25,6 +25,7 @@ const Collection = () => {
   const selectedSubcategoryName = searchParams.get("subcategory");
   const searchQuery = searchParams.get("search");
   const [sortBy, setSortBy] = useState("recommended"); // 'recommended', 'price-low', 'price-high'
+  const [priceRange, setPriceRange] = useState("all");
 
   // Product detail modal states
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -115,6 +116,22 @@ const Collection = () => {
       }
     }
 
+    // Price range filter
+    if (priceRange !== "all") {
+      const priceToCheck = prod.discountPrice || prod.price;
+      if (priceRange === "0-100") {
+        if (priceToCheck > 100) return false;
+      } else if (priceRange === "100-500") {
+        if (priceToCheck < 100 || priceToCheck > 500) return false;
+      } else if (priceRange === "500-1500") {
+        if (priceToCheck < 500 || priceToCheck > 1500) return false;
+      } else if (priceRange === "1500-4000") {
+        if (priceToCheck < 1500 || priceToCheck > 4000) return false;
+      } else if (priceRange === "4000-above") {
+        if (priceToCheck < 4000) return false;
+      }
+    }
+
     return true;
   });
 
@@ -160,19 +177,18 @@ const Collection = () => {
   };
 
   const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=150&q=80',
+    "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=150&q=80",
+    "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=150&q=80",
+    "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=150&q=80",
+    "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=150&q=80",
+    "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=150&q=80",
+    "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=150&q=80",
   ];
 
   const categoryScrollRef = useRef(null);
 
   return (
     <div className="pb-28 pt- bg-ivory min-h-screen">
-
       {/* DESKTOP CATEGORY CIRCLE ROW — lg+ only */}
       <div className="hidden lg:block sticky top-14 z-30 bg-ivory/90 backdrop-blur-md border-b border-primary/10 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
@@ -189,26 +205,34 @@ const Collection = () => {
               <div
                 className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-200 ${
                   !selectedCategoryId
-                    ? 'border-primary shadow-[0_0_0_3px_rgba(197,160,89,0.25)] bg-primary/5'
-                    : 'border-zinc-200 bg-white group-hover:border-primary/40'
+                    ? "border-primary shadow-[0_0_0_3px_rgba(197,160,89,0.25)] bg-primary/5"
+                    : "border-zinc-200 bg-white group-hover:border-primary/40"
                 }`}
               >
-                <span className={`text-[11px] font-bold uppercase tracking-widest ${
-                  !selectedCategoryId ? 'text-primary' : 'text-zinc-500 group-hover:text-zinc-800'
-                }`}>
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-widest ${
+                    !selectedCategoryId
+                      ? "text-primary"
+                      : "text-zinc-500 group-hover:text-zinc-800"
+                  }`}
+                >
                   All
                 </span>
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider max-w-[60px] text-center leading-tight line-clamp-2 ${
-                !selectedCategoryId ? 'text-primary' : 'text-zinc-500'
-              }`}>
+              <span
+                className={`text-[9px] font-bold uppercase tracking-wider max-w-[60px] text-center leading-tight line-clamp-2 ${
+                  !selectedCategoryId ? "text-primary" : "text-zinc-500"
+                }`}
+              >
                 All
               </span>
             </button>
 
             {/* Category circles */}
             {categories.map((cat, idx) => {
-              const img = cat.categoryImage?.url || FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+              const img =
+                cat.categoryImage?.url ||
+                FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
               const active = selectedCategoryId === cat._id;
               return (
                 <button
@@ -220,8 +244,8 @@ const Collection = () => {
                   <div
                     className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all duration-200 ${
                       active
-                        ? 'border-primary shadow-[0_0_0_3px_rgba(197,160,89,0.25)] scale-105'
-                        : 'border-zinc-200 group-hover:border-primary/50 group-hover:scale-105'
+                        ? "border-primary shadow-[0_0_0_3px_rgba(197,160,89,0.25)] scale-105"
+                        : "border-zinc-200 group-hover:border-primary/50 group-hover:scale-105"
                     }`}
                   >
                     <img
@@ -230,9 +254,13 @@ const Collection = () => {
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>
-                  <span className={`text-[9px] font-bold uppercase tracking-wider max-w-[60px] text-center leading-tight line-clamp-2 ${
-                    active ? 'text-primary' : 'text-zinc-500 group-hover:text-zinc-800'
-                  }`}>
+                  <span
+                    className={`text-[9px] font-bold uppercase tracking-wider max-w-[60px] text-center leading-tight line-clamp-2 ${
+                      active
+                        ? "text-primary"
+                        : "text-zinc-500 group-hover:text-zinc-800"
+                    }`}
+                  >
                     {cat.categoryName}
                   </span>
                 </button>
@@ -277,26 +305,51 @@ const Collection = () => {
           )}
 
         {/* 4. Filter Dashboard Footer: Active Filters & Sorting */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center py-4  border-b border-primary/10 gap-4 mb-8">
+        <div className="flex flex-row justify-between items-center py-3 border-b border-primary/10 mb-6 gap-2">
+          {/* Left side: Icon + label at start of row */}
+          <div className="flex items-center gap-1.5 text-zinc-500 flex-shrink-0">
+            <FiSliders className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[10px] font-bold tracking-widest uppercase">
+              Filter
+            </span>
+          </div>
 
-          {/* Sorting controls */}
-          <div className="flex items-center justify-between sm:justify-end gap-3.5">
-            <div className="flex items-center gap-1.5 text-zinc-400">
-              <FiSliders className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-bold tracking-widest uppercase">
-                Sort By
+          {/* Right side: Select inputs side-by-side in a single row */}
+          <div className="flex flex-1 items-center justify-end gap-2">
+            {/* Price Range Filter */}
+            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none">
+              <span className="hidden sm:inline-block text-[9px] font-bold tracking-widest uppercase text-zinc-400 whitespace-nowrap">
+                Price Range
               </span>
+              <select
+                value={priceRange}
+                onChange={(e) => setPriceRange(e.target.value)}
+                className="w-full bg-white/80 border border-primary/15 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 focus:outline-none focus:border-primary cursor-pointer select-none shadow-xs"
+              >
+                <option value="all">All Prices</option>
+                <option value="0-100">₹0 - ₹100</option>
+                <option value="100-500">₹100 - ₹500</option>
+                <option value="500-1500">₹500 - ₹1500</option>
+                <option value="1500-4000">₹1500 - ₹4000</option>
+                <option value="4000-above">₹4000 & Above</option>
+              </select>
             </div>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white/80 border border-primary/15 rounded-xl px-3.5 py-1.5 text-xs font-semibold tracking-wider text-zinc-800 focus:outline-none focus:border-primary cursor-pointer select-none shadow-xs"
-            >
-              <option value="recommended">Curated / New</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
+            {/* Sorting controls */}
+            <div className="flex items-center gap-1.5 w-full sm:w-auto max-w-[140px] sm:max-w-none">
+              <span className="hidden sm:inline-block text-[9px] font-bold tracking-widest uppercase text-zinc-400 whitespace-nowrap">
+                Sort By
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full bg-white/80 border border-primary/15 rounded-xl px-2.5 py-1.5 text-[10px] sm:text-xs font-semibold tracking-wider text-zinc-800 focus:outline-none focus:border-primary cursor-pointer select-none shadow-xs"
+              >
+                <option value="recommended">Curated / New</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -305,7 +358,7 @@ const Collection = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
             {[...Array(8)].map((_, idx) => (
               <div key={idx} className="flex flex-col space-y-4 animate-pulse">
-                <div className="aspect-[3/4] w-full bg-zinc-100 rounded-3xl" />
+                <div className="aspect-square w-full bg-zinc-100 rounded-3xl" />
                 <div className="space-y-2">
                   <div className="h-4 bg-zinc-100 rounded w-1/3" />
                   <div className="h-4 bg-zinc-100 rounded w-2/3" />
@@ -331,8 +384,8 @@ const Collection = () => {
               No Jewellery Found
             </h3>
             <p className="text-xs text-zinc-400 max-w-xs leading-relaxed">
-              We don't have matching jewellery pieces under this specific filter choice.
-              Try broadening your selection or view all pieces.
+              We don't have matching jewellery pieces under this specific filter
+              choice. Try broadening your selection or view all pieces.
             </p>
             <button
               onClick={clearAllFilters}

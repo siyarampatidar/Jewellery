@@ -435,7 +435,7 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
             {[...Array(6)].map((_, idx) => (
               <div key={idx} className="flex flex-col space-y-4 animate-pulse">
-                <div className="aspect-[3/4] w-full bg-zinc-100 rounded-3xl" />
+                <div className="aspect-square w-full bg-zinc-100 rounded-3xl" />
                 <div className="space-y-2">
                   <div className="h-4 bg-zinc-100 rounded w-1/3" />
                   <div className="h-4 bg-zinc-100 rounded w-2/3" />

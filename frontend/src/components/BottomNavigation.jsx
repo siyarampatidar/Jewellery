@@ -87,12 +87,23 @@ const BottomNavigation = () => {
   // Set default active category when categories loaded
   useEffect(() => {
     if (categories && categories.length > 0 && !activeCatId) {
-      setActiveCatId(categories[0]._id);
+      setActiveCatId("all");
     }
   }, [categories, activeCatId]);
 
-  const activeCategory =
-    categories.find((cat) => cat._id === activeCatId) || categories[0];
+  const activeCategory = activeCatId === "all"
+    ? {
+        _id: "all",
+        categoryName: "All Collections",
+        categoryImage: { url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80" },
+        subcategories: categories.map(cat => ({
+          _id: cat._id,
+          subcategoryName: cat.categoryName,
+          isCategoryDirect: true,
+          categoryObj: cat
+        }))
+      }
+    : (categories.find((cat) => cat._id === activeCatId) || categories[0]);
 
   const navItemsLeft = [
     { label: "Home", icon: FiHome, path: "/home" },
@@ -112,18 +123,23 @@ const BottomNavigation = () => {
 
   const handleCategoryClick = (categoryObj) => {
     setIsCategorySheetOpen(false);
-    // toast.success(
-    //   `Browsing silhouette: ${categoryObj.categoryName} in JEWELLERY Atelier`,
-    // );
-    navigate(`/collection?category=${categoryObj._id}`);
+    if (categoryObj._id === 'all') {
+      navigate('/collection');
+    } else {
+      navigate(`/collection?category=${categoryObj._id}`);
+    }
   };
 
-  const handleSubcategoryClick = (categoryId, subcategoryName) => {
+  const handleSubcategoryClick = (categoryId, subcategoryName, isCategoryDirect = false, categoryObj = null) => {
     setIsCategorySheetOpen(false);
-    toast.success(`Browsing: ${subcategoryName} in JEWELLERY Atelier`);
-    navigate(
-      `/collection?category=${categoryId}&subcategory=${encodeURIComponent(subcategoryName)}`,
-    );
+    if (isCategoryDirect && categoryObj) {
+      navigate(`/collection?category=${categoryObj._id}`);
+    } else {
+      toast.success(`Browsing: ${subcategoryName} in JEWELLERY Atelier`);
+      navigate(
+        `/collection?category=${categoryId}&subcategory=${encodeURIComponent(subcategoryName)}`,
+      );
+    }
   };
 
   return (
@@ -318,6 +334,40 @@ const BottomNavigation = () => {
               <div className="flex flex-1 overflow-hidden">
                 {/* Left Column: Categories Sidebar (Category Names) */}
                 <div className="w-[110px] sm:w-[145px] bg-zinc-50 border-r border-primary/10 overflow-y-auto flex-shrink-0 scrollbar-none flex flex-col pb-12">
+                  {/* Virtual 'ALL' Category Option */}
+                  <button
+                    onClick={() => setActiveCatId("all")}
+                    className={`w-full py-4 px-2 flex flex-col items-center gap-1.5 transition-all text-center border-b border-primary/5 cursor-pointer relative outline-hidden ${
+                      activeCatId === "all"
+                        ? "bg-white font-bold text-primary animate-pulse-subtle"
+                        : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50"
+                    }`}
+                  >
+                    {activeCatId === "all" && (
+                      <div className="absolute left-0 top-2 bottom-2 w-[4px] bg-primary rounded-r-full" />
+                    )}
+                    <div
+                      className={`w-11 h-11 rounded-full overflow-hidden border transition duration-300 ${
+                        activeCatId === "all"
+                          ? "border-primary scale-105 shadow-xs"
+                          : "border-zinc-200/80"
+                      }`}
+                    >
+                      <img
+                        src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=150&q=80"
+                        alt="All Pieces"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span
+                      className={`text-[10px] uppercase tracking-wider line-clamp-2 px-1 ${
+                        activeCatId === "all" ? "font-bold text-primary" : "font-semibold text-zinc-500"
+                      }`}
+                    >
+                      All Pieces
+                    </span>
+                  </button>
+
                   {categories.map((cat, idx) => {
                     const isActive = activeCatId === cat._id;
                     const imageUrl =
@@ -379,17 +429,28 @@ const BottomNavigation = () => {
                   {activeCategory ? (
                     <>
                       {/* Active Silhouette Banner */}
-                      <div className="mb-5 relative rounded-2xl overflow-hidden h-24 sm:h-32 bg-zinc-950 flex items-end p-4 border border-primary/10 shadow-xs flex-shrink-0">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                      <div
+                        onClick={() => handleCategoryClick(activeCategory)}
+                        className="mb-5 relative rounded-2xl overflow-hidden h-28 sm:h-32 bg-zinc-950 flex flex-col justify-end p-4 border border-primary/20 shadow-xs flex-shrink-0 cursor-pointer group active:scale-[0.98] transition-all duration-300"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/25 z-10 group-hover:via-black/60 transition duration-300" />
                         <img
                           src={
                             activeCategory.categoryImage?.url ||
                             "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=600&q=80"
                           }
                           alt={activeCategory.categoryName}
-                          className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105"
+                          className="absolute inset-0 w-full h-full object-cover opacity-65 scale-105 group-hover:scale-110 transition duration-700"
                         />
-                        <div className="relative z-20 w-full flex justify-between items-end">
+                        
+                        {/* Tap Indicator Badge */}
+                        <div className="absolute top-3 right-3 z-20 bg-primary/25 border border-primary/45 rounded-full px-2.5 py-0.5 flex items-center gap-1">
+                          <span className="text-[7.5px] font-bold tracking-widest text-primary uppercase animate-pulse">
+                            TAP TO VIEW ALL
+                          </span>
+                        </div>
+
+                        <div className="relative z-20 w-full flex flex-col gap-2">
                           <div>
                             <span className="text-[8px] font-bold tracking-[0.25em] text-primary uppercase block">
                               COLLECTION SILHOUETTE
@@ -398,12 +459,10 @@ const BottomNavigation = () => {
                               {activeCategory.categoryName}
                             </h4>
                           </div>
-                          <button
-                            onClick={() => handleCategoryClick(activeCategory)}
-                            className="text-[9px] font-bold text-primary hover:text-white uppercase tracking-widest flex items-center gap-1 transition bg-white/10 hover:bg-primary px-3 py-1.5 rounded-full backdrop-blur-md cursor-pointer border border-primary/20"
-                          >
-                            Browse All <FiArrowRight className="w-3 h-3" />
-                          </button>
+                          
+                          <div className="w-full py-2 bg-primary group-hover:bg-primary-hover text-zinc-950 font-bold text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 rounded-xl transition duration-300 shadow-md">
+                            Browse All {activeCategory.categoryName === "All Collections" ? "Atelier Pieces" : activeCategory.categoryName} <FiArrowRight className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       </div>
 
@@ -423,10 +482,41 @@ const BottomNavigation = () => {
                       {activeCategory.subcategories &&
                       activeCategory.subcategories.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                          {/* Prepend a virtual "View All" card in the subcategories grid for instant, obvious browsing */}
+                          {activeCategory._id !== "all" && (
+                            <motion.div
+                              whileHover={{ scale: 1.02, y: -2 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleCategoryClick(activeCategory)}
+                              className="luxury-card rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer bg-gradient-to-b from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/25 border border-primary/30 shadow-xs group"
+                            >
+                              <div className="w-full aspect-square rounded-lg overflow-hidden border border-primary/20 bg-zinc-950 mb-2 relative flex items-center justify-center">
+                                <img
+                                  src={
+                                    activeCategory.categoryImage?.url ||
+                                    "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=600&q=80"
+                                  }
+                                  alt={`All ${activeCategory.categoryName}`}
+                                  className="absolute inset-0 w-full h-full object-cover opacity-45 group-hover:scale-110 transition duration-500"
+                                />
+                                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition duration-300" />
+                                <div className="relative z-10 flex flex-col items-center gap-1">
+                                  <span className="text-xl text-primary-light animate-bounce-subtle">✨</span>
+                                  <span className="text-[8px] font-bold tracking-[0.18em] text-primary bg-zinc-950/85 px-2 py-0.5 rounded-full border border-primary/20">
+                                    VIEW ALL
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-primary line-clamp-1 px-1 mt-0.5">
+                                All {activeCategory.categoryName}
+                              </span>
+                            </motion.div>
+                          )}
+
                           {activeCategory.subcategories.map((sub, sIdx) => {
-                            const subImageUrl = getSubcategoryImage(
-                              sub.subcategoryName,
-                            );
+                            const subImageUrl = sub.isCategoryDirect && sub.imageUrl
+                              ? sub.imageUrl
+                              : getSubcategoryImage(sub.subcategoryName);
                             return (
                               <motion.div
                                 whileHover={{ scale: 1.02, y: -2 }}
@@ -436,6 +526,8 @@ const BottomNavigation = () => {
                                   handleSubcategoryClick(
                                     activeCategory._id,
                                     sub.subcategoryName,
+                                    sub.isCategoryDirect,
+                                    sub.categoryObj
                                   )
                                 }
                                 className="luxury-card rounded-xl p-2 flex flex-col items-center text-center cursor-pointer bg-zinc-50/50 hover:bg-white hover:border-primary/40 transition duration-300 border border-primary/5 shadow-xs"
@@ -468,6 +560,16 @@ const BottomNavigation = () => {
                           </button>
                         </div>
                       )}
+
+                      {/* Large Prominent Full-Width Gold Button at bottom to make browsing extremely easy */}
+                      <div className="mt-6 flex-shrink-0">
+                        <button
+                          onClick={() => handleCategoryClick(activeCategory)}
+                          className="w-full py-4 bg-primary hover:bg-zinc-950 text-zinc-950 hover:text-primary hover:border-primary border border-transparent rounded-xl text-[10px] font-bold uppercase tracking-widest transition duration-300 cursor-pointer flex items-center justify-center gap-2 shadow-md animate-pulse-subtle"
+                        >
+                          Explore All {activeCategory.categoryName === "All Collections" ? "Atelier Pieces" : activeCategory.categoryName} <FiArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <div className="flex-1 flex items-center justify-center text-center text-xs text-zinc-400 italic">

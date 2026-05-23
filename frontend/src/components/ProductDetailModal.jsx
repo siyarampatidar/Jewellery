@@ -110,15 +110,15 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
       return;
     }
     dispatch(toggleWishlistDB(product._id));
-    if (isWishlisted) {
-      toast.success('Removed from Wishlist.', {
-        style: { background: '#111', color: '#faf9f6', borderRadius: '12px' }
-      });
-    } else {
-      toast.success('Added to Wishlist!', {
-        style: { background: '#111', color: '#faf9f6', borderRadius: '12px' }
-      });
-    }
+    // if (isWishlisted) {
+    //   toast.success('Removed from Wishlist.', {
+    //     style: { background: '#111', color: '#faf9f6', borderRadius: '12px' }
+    //   });
+    // } else {
+    //   toast.success('Added to Wishlist!', {
+    //     style: { background: '#111', color: '#faf9f6', borderRadius: '12px' }
+    //   });
+    // }
   };
 
   const handleAddToCartClick = () => {
@@ -272,7 +272,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                       onMouseMove={handleMouseMove}
                       onTouchStart={handleTouchStart}
                       onTouchEnd={handleTouchEnd}
-                      className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-zinc-50 border border-primary/5 md:cursor-zoom-in cursor-default"
+                      className="relative aspect-square w-full rounded-2xl overflow-hidden bg-zinc-50 border border-primary/5 md:cursor-zoom-in cursor-default"
                     >
                       {/* Floating Controls (Top-Left) */}
                       <div className="absolute top-3 left-3 z-20 flex flex-col gap-2 items-start">
@@ -558,7 +558,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                               }}
                               className="w-28 flex-shrink-0 bg-white border border-primary/5 hover:border-primary/20 rounded-xl p-2 cursor-pointer transition text-center shadow-xs"
                             >
-                              <div className="aspect-[3/4] w-full rounded-lg overflow-hidden bg-zinc-50 mb-2">
+                              <div className="aspect-square w-full rounded-lg overflow-hidden bg-zinc-50 mb-2">
                                 <img
                                   src={simProd.images?.[0]?.url}
                                   alt={simProd.productName}
